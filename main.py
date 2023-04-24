@@ -9,5 +9,5 @@ def index():
 
 
 @app.get('/blog/{id}')
-def show_blog(id):
-    return {'blog': f"{id}"}
+def show_blog(id: int):
+    return {'blog': id}
