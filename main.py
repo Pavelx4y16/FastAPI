@@ -19,3 +19,8 @@ def show_blog_comments(id: int):
 @app.get('/blog/{id}')
 def show_blog(id: int):
     return {'blog': id}
+
+
+@app.get('/blog/unpublished')
+def show_unpublished_blogs():
+    return {'unpublished': [1, 2, 3, 4, 5]}
