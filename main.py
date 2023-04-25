@@ -4,8 +4,10 @@ app = FastAPI()
 
 
 @app.get('/')
-def index():
-    return {'data': "Blog List"}
+def index(limit: int = 10, published: bool = True):
+    if published:
+        return {'data': f"{limit} published blogs"}
+    return {'data': f"{limit} blogs"}
 
 
 @app.get('/blog/{id}/comments')
