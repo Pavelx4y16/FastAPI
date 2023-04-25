@@ -1,3 +1,4 @@
+import uvicorn
 from fastapi import FastAPI
 
 from forms import Blog
@@ -36,3 +37,7 @@ def create_blog(blog: Blog):
         'blog': blog,
         'status': "created"
     }
+
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="localhost", port=9000)
