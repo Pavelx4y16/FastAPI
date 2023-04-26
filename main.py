@@ -1,7 +1,6 @@
 import uvicorn
 from fastapi import FastAPI
 
-from forms import Blog
 
 app = FastAPI()
 
@@ -29,14 +28,6 @@ def show_unpublished_blogs():
 @app.get('/blog/{id}')
 def show_blog(id: int):
     return {'blog': id}
-
-
-@app.post('/blog/new')
-def create_blog(blog: Blog):
-    return {
-        'blog': blog,
-        'status': "created"
-    }
 
 
 if __name__ == "__main__":
