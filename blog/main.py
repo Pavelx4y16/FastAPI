@@ -28,6 +28,18 @@ def destroy(id: int, db: Session = Depends(get_db)):
     return 'done'
 
 
+@app.put('/blogs/{id}', status_code=status.HTTP_202_ACCEPTED)
+def update(id: int, request: Blog, db: Session = Depends(get_db)):
+    blog = db.query(models.Blog).filter(models.Blog.id == id)
+    if not blog.first():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail=f"Blog with the id {id} is not found.")
+    blog.update({models.Blog.title: request.title, models.Blog.body: request.body})
+    db.commit()
+
+    return 'updated'
+
+
 @app.get('/blogs')
 def blog_list(db: Session = Depends(get_db)):
     blogs = db.query(models.Blog).all()
