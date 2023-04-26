@@ -20,6 +20,14 @@ def create(blog: Blog, db: Session = Depends(get_db)):
     return new_blog
 
 
+@app.delete('/blogs/{id}', status_code=status.HTTP_204_NO_CONTENT)
+def destroy(id: int, db: Session = Depends(get_db)):
+    db.query(models.Blog).filter(models.Blog.id == id).delete(synchronize_session=False)
+    db.commit()
+
+    return 'done'
+
+
 @app.get('/blogs')
 def blog_list(db: Session = Depends(get_db)):
     blogs = db.query(models.Blog).all()
@@ -28,7 +36,7 @@ def blog_list(db: Session = Depends(get_db)):
 
 
 @app.get('/blogs/{id}', status_code=200)
-def blog_by_id(id: int, response: Response, db: Session = Depends(get_db)):
+def blog_by_id(id: int, db: Session = Depends(get_db)):
     blog = db.query(models.Blog).filter(models.Blog.id == id).first()
     if not blog:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
