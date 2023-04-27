@@ -15,7 +15,7 @@ models.Base.metadata.create_all(engine)
 
 @app.post('/blog', status_code=status.HTTP_201_CREATED, tags=["blogs"])
 def create(blog: schemas.Blog, db: Session = Depends(get_db)):
-    new_blog = models.Blog(title=blog.title, body=blog.body)
+    new_blog = models.Blog(title=blog.title, body=blog.body, user_id=1)
     db.add(new_blog)
     db.commit()
     db.refresh(new_blog)
