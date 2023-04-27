@@ -21,6 +21,16 @@ def create(blog: schemas.Blog, db: Session = Depends(get_db)):
     return new_blog
 
 
+@app.post('/user', status_code=status.HTTP_201_CREATED)
+def create(request: schemas.User, db: Session = Depends(get_db)):
+    new_user = models.User(name=request.name, email=request.email, password=request.password)
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+
+    return new_user
+
+
 @app.delete('/blogs/{id}', status_code=status.HTTP_204_NO_CONTENT)
 def destroy(id: int, db: Session = Depends(get_db)):
     db.query(models.Blog).filter(models.Blog.id == id).delete(synchronize_session=False)
