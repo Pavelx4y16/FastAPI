@@ -1,9 +1,10 @@
+from typing import List
+
 import uvicorn
-from fastapi import FastAPI, Depends, status, Response, HTTPException
+from fastapi import FastAPI, Depends, status, HTTPException
 from sqlalchemy.orm import Session
 
-from forms import Blog
-import models
+import models, schemas
 from database import engine, get_db
 
 app = FastAPI()
@@ -11,7 +12,7 @@ models.Base.metadata.create_all(engine)
 
 
 @app.post('/blog', status_code=status.HTTP_201_CREATED)
-def create(blog: Blog, db: Session = Depends(get_db)):
+def create(blog: schemas.Blog, db: Session = Depends(get_db)):
     new_blog = models.Blog(title=blog.title, body=blog.body)
     db.add(new_blog)
     db.commit()
@@ -29,7 +30,7 @@ def destroy(id: int, db: Session = Depends(get_db)):
 
 
 @app.put('/blogs/{id}', status_code=status.HTTP_202_ACCEPTED)
-def update(id: int, request: Blog, db: Session = Depends(get_db)):
+def update(id: int, request: schemas.Blog, db: Session = Depends(get_db)):
     blog = db.query(models.Blog).filter(models.Blog.id == id)
     if not blog.first():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
@@ -40,14 +41,14 @@ def update(id: int, request: Blog, db: Session = Depends(get_db)):
     return 'updated'
 
 
-@app.get('/blogs')
+@app.get('/blogs', response_model=List[schemas.ShowBlog])
 def blog_list(db: Session = Depends(get_db)):
     blogs = db.query(models.Blog).all()
 
     return blogs
 
 
-@app.get('/blogs/{id}', status_code=200)
+@app.get('/blogs/{id}', status_code=status.HTTP_200_OK, response_model=schemas.ShowBlog)
 def blog_by_id(id: int, db: Session = Depends(get_db)):
     blog = db.query(models.Blog).filter(models.Blog.id == id).first()
     if not blog:
