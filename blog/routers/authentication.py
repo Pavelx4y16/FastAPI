@@ -1,9 +1,7 @@
-from datetime import timedelta
-
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
-import schemas
 from JWToken import create_access_token
 from database import get_db
 from hashing import Hash
@@ -16,7 +14,7 @@ router = APIRouter(
 
 
 @router.post('/login')
-def login(request: schemas.Login, db: Session = Depends(get_db)):
+def login(request: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     user = user_utils.get_by_email(email=request.username, db=db)
 
     if not Hash.verify(user.password, request.password):
