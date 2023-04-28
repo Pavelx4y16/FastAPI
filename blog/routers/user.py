@@ -1,11 +1,11 @@
 from typing import List
 
-import models
+from fastapi import APIRouter, Depends, status
+from sqlalchemy.orm import Session
+
 import schemas
 from database import get_db
-from fastapi import APIRouter, Depends, status, HTTPException
-from hashing import Hash
-from sqlalchemy.orm import Session
+from repository import user as user_utils
 
 router = APIRouter(
     prefix="/user",
@@ -13,57 +13,26 @@ router = APIRouter(
 )
 
 
-@router.post('/', status_code=status.HTTP_201_CREATED, response_model=schemas.ShowUser)
-def create(request: schemas.User, db: Session = Depends(get_db)):
-    new_user = models.User(name=request.name, email=request.email, password=Hash.bcrypt(request.password))
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
-
-    return new_user
-
-
-@router.delete('/{id}', status_code=status.HTTP_204_NO_CONTENT)
-def destroy(id: int, db: Session = Depends(get_db)):
-    items = db.query(models.User).filter(models.User.id == id)
-
-    if not items.first():
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail=f"Item with the id {id} is not found.")
-
-    items.delete(synchronize_session=False)
-    db.commit()
-
-    return 'done'
-
-
-@router.put('/{id}', status_code=status.HTTP_202_ACCEPTED)
-def update(id: int, request: schemas.User, db: Session = Depends(get_db)):
-    user = db.query(models.User).filter(models.User.id == id)
-
-    if not user.first():
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail=f"User with the id {id} is not found.")
-    user.update({
-        models.User.name: request.name,
-        models.User.email: request.email,
-        models.User.password: request.password})
-    db.commit()
-
-    return 'updated'
-
-
 @router.get('/', response_model=List[schemas.ShowUser])
 def user_list(db: Session = Depends(get_db)):
-    users = db.query(models.User).all()
-
-    return users
+    return user_utils.get_all(db)
 
 
 @router.get('/{id}', status_code=status.HTTP_200_OK, response_model=schemas.ShowUser)
 def user_by_id(id: int, db: Session = Depends(get_db)):
-    user = db.query(models.User).filter(models.User.id == id).first()
-    if not user:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail=f"User with the id {id} is not found.")
-    return user
+    return user_utils.get_by_id(id=id, db=db)
+
+
+@router.post('/', status_code=status.HTTP_201_CREATED, response_model=schemas.ShowUser)
+def create(request: schemas.User, db: Session = Depends(get_db)):
+    return user_utils.create(request=request, db=db)
+
+
+@router.delete('/{id}', status_code=status.HTTP_204_NO_CONTENT)
+def destroy(id: int, db: Session = Depends(get_db)):
+    return user_utils.destroy(id=id, db=db)
+
+
+@router.put('/{id}', status_code=status.HTTP_202_ACCEPTED)
+def update(id: int, request: schemas.User, db: Session = Depends(get_db)):
+    return user_utils.update(id=id, request=request, db=db)
