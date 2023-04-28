@@ -1,9 +1,9 @@
 import uvicorn
 from fastapi import FastAPI
 
-import models
-from database import engine
-from routers import user, blog, authentication
+from blog_app import models
+from blog_app.database import engine
+from blog_app.routers import user, blog, authentication
 
 app = FastAPI()
 
