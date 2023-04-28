@@ -1,7 +1,10 @@
+from datetime import timedelta
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 import schemas
+from JWToken import create_access_token
 from database import get_db
 from hashing import Hash
 from repository import user as user_utils
@@ -20,4 +23,6 @@ def login(request: schemas.Login, db: Session = Depends(get_db)):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail=f"Invalid Credentials")
 
-    return user
+    access_token = create_access_token(data={"sub": user.email})
+
+    return {"access_token": access_token, "token_type": "bearer"}
